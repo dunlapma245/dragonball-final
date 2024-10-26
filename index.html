@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragon Ball Snake Draft Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom right, #e0f7fa, #b2ebf2);
+            color: #333;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #00796b;
+            margin-bottom: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .team, .character-list {
+            border: 2px solid #00796b;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 30%;
+            padding: 20px;
+            margin: 10px;
+            position: relative;
+        }
+        .character-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .character-item {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #00796b;
+            border-radius: 5px;
+            background-color: #b2dfdb;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .character-item:hover {
+            background-color: #00796b;
+            color: white;
+        }
+        .selected {
+            background-color: #ffccbc;
+        }
+        .drafted-characters {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .draft-button {
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: block;
+            text-align: center;
+        }
+        .draft-button:hover {
+            background-color: #004d40;
+        }
+        #log {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #d32f2f;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dragon Ball Snake Draft Game</h1>
+    <div class="container">
+        <div class="character-list" id="character-list">
+            <h2>Available Characters</h2>
+            <ul id="characters"></ul>
+        </div>
+        <div class="team" id="team1">
+            <h2>Team 1</h2>
+            <ul class="drafted-characters" id="team1-list"></ul>
+        </div>
+        <div class="team" id="team2">
+            <h2>Team 2</h2>
+            <ul class="drafted-characters" id="team2-list"></ul>
+        </div>
+        <div class="team" id="team3">
+            <h2>Team 3</h2>
+            <ul class="drafted-characters" id="team3-list"></ul>
+        </div>
+    </div>
+    <button class="draft-button" id="draft-btn">Draft Character</button>
+    <div id="log"></div>
+
+    <script>
+        const characters = [
+            {name: "Goku"}, {name: "Vegeta"}, {name: "Gohan"}, {name: "Piccolo"},
+            {name: "Krillin"}, {name: "Trunks"}, {name: "Android 18"}, {name: "Frieza"},
+            {name: "Majin Buu"}, {name: "Cell"}, {name: "Yamcha"}, {name: "Tien Shinhan"},
+            {name: "Chiaotzu"}, {name: "Bulma"}, {name: "Master Roshi"}, {name: "Chi-Chi"},
+            {name: "Mr. Satan"}, {name: "Dende"}, {name: "Videl"}, {name: "Raditz"},
+            {name: "Nappa"}, {name: "Bardock"}, {name: "King Vegeta"}, {name: "Goten"},
+            {name: "Cabba"}, {name: "Kale"}, {name: "Caulifla"}, {name: "Captain Ginyu"},
+            {name: "Jeice"}, {name: "Burter"}, {name: "Recoome"}, {name: "Guldo"},
+            {name: "Zarbon"}, {name: "Dodoria"}, {name: "Babidi"}, {name: "Dabura"},
+            {name: "Broly"}, {name: "Beerus"}, {name: "Whis"}, {name: "Shenron"},
+            {name: "Gotenks"}, {name: "Majin Vegeta"}, {name: "Champa"}, {name: "Vados"},
+            {name: "Kefla"}, {name: "Hit"}, {name: "Jiren"}, {name: "Toppo"},
+            {name: "Dyspo"}, {name: "Kale (Berserk)"}, {name: "Cabba (SSJ)"}, {name: "Moro"},
+            {name: "Granolah"}, {name: "Goku Black"}, {name: "Zamasu"}, {name: "Bardock (DBS)"},
+            {name: "King Kai"}, {name: "Guldo (Ginyu Force)"}, {name: "Babidi (Majin)"},
+            {name: "Android 16"}, {name: "Android 17"}, {name: "Android 19"}, {name: "Bulma (DBS)"},
+            {name: "Dr. Gero"}, {name: "King Cold"}, {name: "Frieza (Final Form)"},
+            {name: "Goku (Ultra Instinct)"}, {name: "Vegeta (SSJ God)"}, {name: "Hit (Time Skip)"},
+            {name: "Whis (Training)"}, {name: "Jiren (Full Power)"}, {name: "Shenron (DBZ)"},
+            {name: "Fasha"}, {name: "Paragus"}, {name: "Toma"}, {name: "Karn"},
+            {name: "Nappa (Revived)"}, {name: "Goku (Kid)"}, {name: "Kefla (SSJ)"},
+            {name: "Hit (Training)"}, {name: "Nappa (DBZ)"}, {name: "Mysterious Warrior"},
+            {name: "Lord Chilled"}, {name: "Ribrianne"}, {name: "Goku (Dragon Ball)"},
+            {name: "Vegeta (Dragon Ball)"}, {name: "Goku (Dragon Ball GT)"}, 
+            {name: "Vegeta (Dragon Ball GT)"}, {name: "Trunks (Dragon Ball GT)"}, 
+            {name: "Pan (Dragon Ball GT)"}, {name: "Omega Shenron"}, {name: "Janemba"},
+            {name: "Tapion"}, {name: "Hirudegarn"}, {name: "Towa"}, {name: "Mira"},
+            {name: "Goku (SSJ4)"}, {name: "Vegeta (SSJ4)"}, {name: "Frost"},
+            {name: "Sorbet"}, {name: "Shisami"}, {name: "Burta"}, {name: "Goku (SSJ Blue)"},
+            {name: "Vegeta (SSJ Blue)"}, {name: "Goten (Kid)"}, {name: "Trunks (Kid)"},
+            {name: "Goku (Super Saiyan)"},
+            {name: "Vegeta (Super Saiyan)"}, {name: "Gohan (Teen)"}, {name: "Champa (DBS)"},
+            {name: "Vados (DBS)"}, {name: "Cabba (DBS)"}, {name: "Caulifla (DBS)"},
+            {name: "Goku (Dragon Ball Super)"}, {name: "Broly (Dragon Ball Super)"},
+            {name: "Nappa (Dragon Ball Super)"}, {name: "Android 21"}, {name: "Zamasu (Fused)"},
+            {name: "Kefla (DBS)"}, {name: "Goku (Base)"}, {name: "Vegeta (Base)"},
+            {name: "Kefla (Fusion)"}, {name: "Ribrianne (DBS)"}, {name: "Shenron (DBS)"},
+            {name: "Grand Zeno"}, {name: "Zeno's Guards"}, {name: "Yamcha (DBS)"},
+            {name: "Trunks (Teen)"}, {name: "Bardock (DBZ)"}, {name: "Goku (SSJ God)"},
+            {name: "Vegeta (Majin)"}, {name: "Yamcha (DBS)"}, {name: "Bulma (Kid)"},
+            {name: "Goten (Teen)"}, {name: "Trunks (Teen)"}, {name: "Demon King Piccolo"},
+            {name: "Bardock (DBS)"}, {name: "Goku (Fighting Spirit)"}, {name: "Vegeta (Fighting Spirit)"}, 
+            {name: "Nappa (Revived)"}, {name: "Frieza (DBZ)"}, {name: "Goku (Fusion Reborn)"},
+            {name: "Vegeta (Fusion Reborn)"}, {name: "Gohan (Mystic)"}, {name: "Demon King Piccolo (DBZ)"},
+            {name: "Goku (UI Sign)"}, {name: "Vegeta (Evolved)"}, {name: "Jiren (DBS)"},
+            {name: "Frost (DBS)"}, {name: "Hit (DBS)"}, {name: "Demon King Piccolo (DB)"},
+            {name: "Goku (Super Saiyan Blue)"},
+            {name: "Vegeta (Super Saiyan Blue)"}, {name: "Bardock (DBS)"}, {name: "Mafuba Master"},
+            {name: "Frost Demon"}, {name: "Goku (Super Saiyan 4)"}, {name: "Vegeta (Super Saiyan 4)"},
+            {name: "Beerus (DBS)"}, {name: "Wiss (DBS)"}, {name: "Champa (DBS)"},
+            {name: "Vados (DBS)"}, {name: "Frost (DBS)"}, {name: "Hit (DBS)"}, 
+            {name: "Goku (Ultra Instinct)"}, {name: "Vegeta (Evolved)"}, {name: "Jiren (Full Power)"},
+            {name: "Kefla (Super Saiyan)"}, {name: "Zamasu (DBS)"}, {name: "Moro (DBS)"},
+            {name: "Granolah (DBS)"}, {name: "Goku (Super Saiyan God)"},
+            {name: "Vegeta (Super Saiyan God)"}, {name: "Trunks (Super Saiyan 2)"},
+            {name: "Goten (Super Saiyan 2)"}, {name: "Bardock (Fighting Spirit)"},
+            {name: "Goku (Super Saiyan 3)"}, {name: "Vegeta (Super Saiyan 3)"},
+            {name: "Gohan (Super Saiyan)"}, {name: "Krillin (DBS)"}, {name: "Yamcha (DBZ)"},
+            {name: "Goku (Super Saiyan 4)"}, {name: "Vegeta (Super Saiyan 4)"},
+            {name: "Kefla (Super Saiyan 2)"}, {name: "Goku (Super Saiyan Blue Kaio-Ken)"},
+            {name: "Vegeta (Super Saiyan Blue Kaio-Ken)"}, {name: "Zamasu (Super Saiyan)"},
+            {name: "Kefla (Super Saiyan God)"}, {name: "Goku (Ultra Instinct Sign)"},
+            {name: "Goku (Super Saiyan God)"}, {name: "Vegeta (Super Saiyan God)"}
+        ];
+
+        let teams = [[], [], []];
+        let currentTeam = 0;
+
+        const characterListElement = document.getElementById('characters');
+        const teamLists = [
+            document.getElementById('team1-list'),
+            document.getElementById('team2-list'),
+            document.getElementById('team3-list')
+        ];
+
+        function displayCharacters() {
+            characters.forEach((character, index) => {
+                const li = document.createElement('li');
+                li.className = 'character-item';
+                li.textContent = character.name;
+                li.onclick = () => selectCharacter(index);
+                characterListElement.appendChild(li);
+            });
+        }
+
+        function selectCharacter(index) {
+            const selected = characterListElement.children[index];
+            if (!selected.classList.contains('selected')) {
+                selected.classList.add('selected');
+                teams[currentTeam].push(index);
+                document.getElementById('log').textContent = `${characters[index].name} drafted by Team ${currentTeam + 1}.`;
+            }
+        }
+
+        document.getElementById('draft-btn').onclick = function() {
+            if (teams[currentTeam].length < 5) {
+                const availableCharacters = characters.filter((_, index) => !teams.flat().includes(index));
+                if (availableCharacters.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableCharacters.length);
+                    const selectedCharacter = availableCharacters[randomIndex];
+                    selectCharacter(characters.indexOf(selectedCharacter));
+                    teamLists[currentTeam].innerHTML = teams[currentTeam].map(i => `<li>${characters[i].name}</li>`).join('');
+                    if (teams[currentTeam].length === 5) {
+                        currentTeam++;
+                        if (currentTeam >= teams.length) currentTeam = 0; // Reset to the first team for the next round
+                    }
+                }
+            } else {
+                document.getElementById('log').textContent = `Team ${currentTeam + 1} has already drafted 5 characters.`;
+            }
+        };
+
+        displayCharacters();
+    </script>
+</body>
+</html>
